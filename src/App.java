@@ -13,7 +13,7 @@ public class App {
 
                 int opcao = -1;
 
-                // Tratamento de exceções para garantir que a entrada seja um número
+                // Tratamento de exceções para garantir que a entrada seja um número válido
                 try {
                     opcao = scanner.nextInt();
                     scanner.nextLine(); // Consumir a nova linha
@@ -26,18 +26,22 @@ public class App {
                 switch (opcao) {
                     case 1:
                         System.out.print("Digite a placa do carro: ");
-                        String placa = scanner.nextLine();
+                        String placa = scanner.nextLine().toUpperCase(); // Garantir que a placa seja em maiúsculas
 
                         if (placa.isEmpty()) {
                             System.out.println("Placa inválida. A placa não pode ser vazia.");
                         } else {
-                            estacionamento.estacionarCarro(new Carro(placa));
+                            if (estacionamento.placaJaExiste(placa)) {
+                                System.out.println("Erro: Já existe um carro com a placa " + placa + " no estacionamento ou na fila de espera.");
+                            } else {
+                                estacionamento.estacionarCarro(new Carro(placa));
+                            }
                         }
                         break;
 
                     case 2:
                         System.out.print("Digite a placa do carro a remover: ");
-                        String placaRemover = scanner.nextLine();
+                        String placaRemover = scanner.nextLine().toUpperCase(); // Garantir que a placa seja em maiúsculas
 
                         if (placaRemover.isEmpty()) {
                             System.out.println("Placa inválida. A placa não pode ser vazia.");
@@ -52,7 +56,7 @@ public class App {
 
                     case 4:
                         System.out.println("Saindo...");
-                        return;
+                        return; // Finaliza o programa
 
                     default:
                         System.out.println("Opção inválida. Por favor, escolha uma opção de 1 a 4.");

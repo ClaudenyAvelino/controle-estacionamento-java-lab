@@ -128,13 +128,22 @@ public class Estacionamento implements IEstacionamento  {
             return;
         }
 
+        // Cópia manual do array de carros estacionados (sem Arrays.copyOf())
+        ICarro[] carrosParaOrdenar = new ICarro[numCarrosEstacionados];
+        for (int i = 0; i < numCarrosEstacionados; i++) {
+            carrosParaOrdenar[i] = carrosEstacionados[i];
+        }
+
+        // Ordenação dos carros com MergeSort
+        MergeSort<ICarro> mergeSort = new MergeSort<>();
+        mergeSort.ordenar(carrosParaOrdenar);
+
+        // Imprime o relatório ordenado
         System.out.println("Relatório Diário:");
-        for (ICarro carro : carrosEstacionados) {
-            if (carro != null) {
-                System.out.println("Placa: " + carro.getPlaca() +
-                        ", Chegada: " + carro.getHorarioChegada() +
-                        ", Saída: " + (carro.getHorarioSaida() == 0 ? "Ainda estacionado" : carro.getHorarioSaida()));
-            }
+        for (ICarro carro : carrosParaOrdenar) {
+            System.out.println("Placa: " + carro.getPlaca() +
+                    ", Chegada: " + carro.getHorarioChegada() +
+                    ", Saída: " + (carro.getHorarioSaida() == 0 ? "Ainda estacionado" : carro.getHorarioSaida()));
         }
     }
 }
