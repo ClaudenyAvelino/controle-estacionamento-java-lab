@@ -1,24 +1,26 @@
-public class Estacionamento implements IEstacionamento  {
+public class Estacionamento implements IEstacionamento {
 
     private PilhaVet<ICarro> vagas;
     private FilaEnc<ICarro> filaEspera;
     private ICarro[] carrosEstacionados;
     private int numCarrosEstacionados;
     private final int MAX_VAGAS;
+    private int horarioChegada = 1;
+    private int horarioSaida = 1;
 
     public Estacionamento(int maxVagas) {
         this.MAX_VAGAS = maxVagas;
         this.vagas = new PilhaVet<>();
         this.filaEspera = new FilaEnc<>();
-        this.carrosEstacionados = new ICarro[maxVagas]; // Inicializa com o número máximo de vagas
+        this.carrosEstacionados = new ICarro[maxVagas];
         this.numCarrosEstacionados = 0;
     }
 
-    // Redimensiona o array de carros estacionados
+    // Redimensiona o array carrosEstacionados sem usar Arrays.copyOf()
     private void redimensionarCarrosEstacionados() {
         int novoTamanho = carrosEstacionados.length * 2;
         ICarro[] novoArray = new ICarro[novoTamanho];
-        for (int i = 0; i < numCarrosEstacionados; i++) {
+        for (int i = 0; i < numCarrosEstacionados; i++) { // Copia manualmente os elementos
             novoArray[i] = carrosEstacionados[i];
         }
         carrosEstacionados = novoArray;
@@ -45,47 +47,38 @@ public class Estacionamento implements IEstacionamento  {
         System.out.print(menuOpcoes);
     }
 
+
     // Verifica se a placa já existe no estacionamento ou na fila de espera
-    public boolean placaJaExiste(String placa) {
-        // Verifica no estacionamento (array de carros)
+    boolean placaJaExiste(String placa) {
         for (ICarro carro : carrosEstacionados) {
             if (carro != null && carro.getPlaca().equals(placa)) {
                 return true;
             }
         }
 
-        // Verifica na fila de espera utilizando o iterator da FilaEnc
-        for (ICarro carro : filaEspera) { // Usando iterator implicitamente
+        for (ICarro carro : filaEspera) {
             if (carro != null && carro.getPlaca().equals(placa)) {
                 return true;
             }
         }
-
         return false;
     }
 
 
-
     // Método para estacionar um carro
+    @Override
     public void estacionarCarro(ICarro carro) {
         if (placaJaExiste(carro.getPlaca())) {
             System.out.println("Erro: Já existe um carro com a placa " + carro.getPlaca() + " no estacionamento ou na fila de espera.");
             return;
         }
 
-        // Se o estacionamento não estiver cheio, estaciona o carro
-        if (numCarrosEstacionados < MAX_VAGAS) {
-            // Encontrando a primeira vaga disponível no array de carros estacionados
-            for (int i = 0; i < carrosEstacionados.length; i++) {
-                if (carrosEstacionados[i] == null) {
-                    carrosEstacionados[i] = carro;
-                    numCarrosEstacionados++;
-                    System.out.println("Carro " + carro.getPlaca() + " estacionado.");
-                    return;
-                }
-            }
+        if (vagas.tamanho() < MAX_VAGAS) {
+            vagas.empilhar(carro);
+            carro.setHorarioChegada(horarioChegada++);
+            carrosEstacionados[numCarrosEstacionados++] = carro;
+            System.out.println("Carro " + carro.getPlaca() + " estacionado.");
         } else {
-            // Se estiver cheio, coloca o carro na fila de espera
             filaEspera.enfileirar(carro);
             System.out.println("Carro " + carro.getPlaca() + " na fila de espera.");
         }
@@ -94,31 +87,78 @@ public class Estacionamento implements IEstacionamento  {
     // Método para remover um carro
     @Override
     public void removerCarro(String placa) {
-        ICarro carroRemovido = null;
-
-        // Remove o carro do estacionamento
-        for (int i = 0; i < carrosEstacionados.length; i++) {
-            if (carrosEstacionados[i] != null && carrosEstacionados[i].getPlaca().equals(placa)) {
-                carroRemovido = carrosEstacionados[i];
-                carrosEstacionados[i] = null;
-                numCarrosEstacionados--;
-                System.out.println("Carro " + placa + " removido.");
-                break;
-            }
-        }
-
-        // Se o carro não foi encontrado, retorna
-        if (carroRemovido == null) {
-            System.out.println("Carro " + placa + " não encontrado no estacionamento.");
+        if (vagas.estaVazia()) {
+            System.out.println("O estacionamento está vazio.");
             return;
         }
 
-        // Após a remoção, coloca o próximo carro da fila na vaga, se houver
-        if (!filaEspera.estaVazia()) {
-            ICarro carroFila = filaEspera.remover();
-            estacionarCarro(carroFila);
+        PilhaVet<ICarro> temp = new PilhaVet<>();
+        ICarro carroRemovido = null;
+        int horarioSaidaAtual = horarioSaida; // Corrige o horário de saída
+
+        while (!vagas.estaVazia()) {
+            ICarro carroAtual = vagas.desempilhar();
+            if (carroAtual != null && carroAtual.getPlaca().equals(placa)) {
+                carroRemovido = carroAtual;
+                carroRemovido.setHorarioSaida(horarioSaidaAtual++); // Horário de saída correto
+                break;
+            }
+            temp.empilhar(carroAtual);
+        }
+
+        while (!temp.estaVazia()) {
+            vagas.empilhar(temp.desempilhar());
+        }
+
+
+
+        if (carroRemovido != null) {
+
+            System.out.println("Carro " + carroRemovido.getPlaca() + " removido.");
+
+
+
+            // Remove o carro do array carrosEstacionados (corrigido)
+            for (int i = 0; i < numCarrosEstacionados; i++) {
+                if (carrosEstacionados[i] == carroRemovido) {
+
+
+                    for (int j = i; j < numCarrosEstacionados - 1; j++) {
+
+                        carrosEstacionados[j] = carrosEstacionados[j + 1];
+
+
+                    }
+                    carrosEstacionados[numCarrosEstacionados - 1] = null;
+
+
+                    numCarrosEstacionados--;
+
+
+                    horarioSaida = horarioSaidaAtual; // Atualiza o horário de saída global
+
+
+                    break; // Sai do loop após remover o carro
+
+                }
+
+
+            }
+
+            // Move o próximo carro da fila de espera para o estacionamento, se houver
+            if (!filaEspera.estaVazia() && vagas.tamanho() < MAX_VAGAS) {
+                estacionarCarro(filaEspera.remover());
+            } else if (!filaEspera.estaVazia()) {
+                System.out.println("Há carros na fila de espera, mas o estacionamento está cheio.");
+            } else {
+                System.out.println("Vaga liberada, mas a fila de espera está vazia.");
+            }
+        } else {
+            System.out.println("Carro com placa " + placa + " não encontrado.");
         }
     }
+
+
 
     // Método para gerar o relatório diário
     @Override
@@ -128,22 +168,33 @@ public class Estacionamento implements IEstacionamento  {
             return;
         }
 
-        // Cópia manual do array de carros estacionados (sem Arrays.copyOf())
+        // Cria uma cópia do array carrosEstacionados SEM USAR Arrays.copyOf()
         ICarro[] carrosParaOrdenar = new ICarro[numCarrosEstacionados];
         for (int i = 0; i < numCarrosEstacionados; i++) {
             carrosParaOrdenar[i] = carrosEstacionados[i];
         }
 
-        // Ordenação dos carros com MergeSort
+        // Ordena a cópia usando MergeSort (implementação manual)
         MergeSort<ICarro> mergeSort = new MergeSort<>();
         mergeSort.ordenar(carrosParaOrdenar);
 
-        // Imprime o relatório ordenado
+
         System.out.println("Relatório Diário:");
-        for (ICarro carro : carrosParaOrdenar) {
-            System.out.println("Placa: " + carro.getPlaca() +
-                    ", Chegada: " + carro.getHorarioChegada() +
-                    ", Saída: " + (carro.getHorarioSaida() == 0 ? "Ainda estacionado" : carro.getHorarioSaida()));
+
+
+        for (int i = 0; i < numCarrosEstacionados; i++) {
+
+            if (carrosParaOrdenar[i] != null) {
+                System.out.println("Placa: " + carrosParaOrdenar[i].getPlaca() +
+                        ", Chegada: " + carrosParaOrdenar[i].getHorarioChegada() +
+                        ", Saída: " + (carrosParaOrdenar[i].getHorarioSaida() == 0 ? "Ainda estacionado" : carrosParaOrdenar[i].getHorarioSaida()));
+
+            }
+
+
         }
+
+
     }
+
 }

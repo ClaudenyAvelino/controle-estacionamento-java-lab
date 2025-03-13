@@ -12,31 +12,33 @@ public class FilaEnc<T> implements IFila<T>, Iterable<T> {
 
     @Override
     public Iterator<T> iterator() {
-        Iterator<T> myIterator = new Iterator<T>() {
-            private NoDupEnc<T> aux = noCabeca.getProximo(); // Mudado para ir para o primeiro elemento real
+        return new Iterator<T>() {
+            private NoDupEnc<T> atual = noCabeca.getProximo();
 
+            @Override
             public boolean hasNext() {
-                return aux != null; // Verifica se há mais elementos
+                return atual != null;
             }
 
+            @Override
             public T next() {
                 if (hasNext()) {
-                    T elemento = aux.getElemento();
-                    aux = aux.getProximo();
+                    T elemento = atual.getElemento();
+                    atual = atual.getProximo();
                     return elemento;
                 } else {
                     throw new NoSuchElementException();
                 }
             }
 
-            @Override
+            @Override //remove o anterior, adiciona novo metodo remove
             public void remove() {
-                // Não implementado
+                throw new UnsupportedOperationException("Remoção via iterador não permitida");
             }
-        };
-        return myIterator;
-    }
 
+
+        };
+    }
 
 
     @Override

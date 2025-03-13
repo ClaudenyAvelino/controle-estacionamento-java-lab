@@ -12,15 +12,13 @@ public class App {
                 estacionamento.opcoesMenu();
 
                 int opcao = -1;
-
-                // Tratamento de exceções para garantir que a entrada seja um número válido
                 try {
                     opcao = scanner.nextInt();
                     scanner.nextLine(); // Consumir a nova linha
                 } catch (InputMismatchException e) {
-                    System.out.println("Entrada inválida! Por favor, insira um número válido.");
-                    scanner.nextLine(); // Consumir a linha inválida
-                    continue;
+                    System.out.println("Entrada inválida! Por favor, insira um número.");
+                    scanner.next(); // Limpar o buffer do scanner
+                    continue; // Volta para o início do loop
                 }
 
                 switch (opcao) {

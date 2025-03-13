@@ -3,11 +3,10 @@ class Carro implements ICarro, Comparable<ICarro> {
     private int horarioChegada;
     private int horarioSaida;
 
-    // Modificar o construtor para aceitar apenas a placa
     public Carro(String placa) {
         this.placa = placa;
-        this.horarioChegada = 0; // Atribuindo um valor padrão para o horário de chegada
-        this.horarioSaida = 0;   // Atribuindo um valor padrão para o horário de saída
+        this.horarioChegada = 0;
+        this.horarioSaida = 0;
     }
 
     @Override
@@ -40,8 +39,9 @@ class Carro implements ICarro, Comparable<ICarro> {
         this.horarioSaida = horarioSaida;
     }
 
+    @Override
     public int compareTo(ICarro outroCarro) {
-        // Compara por horário de chegada
         return Integer.compare(this.getHorarioChegada(), outroCarro.getHorarioChegada());
     }
+
 }
