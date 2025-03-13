@@ -6,7 +6,7 @@ public class PilhaVet<T> implements IPilha<T> {
     private int vlIncremento;
     private int topo;
 
-    public PilhaVet() {
+    public PilhaVet(int MAX_VAGAS) {
         tamVetor = 10; // Tamanho inicial do vetor
         V = (T[]) new Object[tamVetor];
         topo = 0;
