@@ -64,7 +64,6 @@ public class Estacionamento implements IEstacionamento {
         return false;
     }
 
-
     // Método para estacionar um carro
     @Override
     public void estacionarCarro(ICarro carro) {
@@ -78,8 +77,6 @@ public class Estacionamento implements IEstacionamento {
             if (numCarrosEstacionados == carrosEstacionados.length) {
                 redimensionarCarrosEstacionados();
             }
-
-
 
             vagas.empilhar(carro);
             carro.setHorarioChegada(horarioChegada++);
@@ -102,7 +99,6 @@ public class Estacionamento implements IEstacionamento {
 
         PilhaVet<ICarro> temp = new PilhaVet<>(MAX_VAGAS); // Pilha temporária com tamanho fixo
         ICarro carroRemovido = null;
-
 
 
         while (!vagas.estaVazia()) {
@@ -145,8 +141,6 @@ public class Estacionamento implements IEstacionamento {
 
             }
 
-
-
             // Remove o carro do array carrosEstacionados (após restaurar a pilha)
 
             for (int i = 0; i < numCarrosEstacionados; i++) {
@@ -157,10 +151,7 @@ public class Estacionamento implements IEstacionamento {
                         carrosEstacionados[j] = carrosEstacionados[j + 1];
                     }
                     carrosEstacionados[numCarrosEstacionados - 1] = null;
-
                     numCarrosEstacionados--;
-
-
                     break;
                 }
             }
