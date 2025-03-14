@@ -51,11 +51,10 @@ public class Estacionamento implements IEstacionamento {
     // Verifica se a placa já existe no estacionamento ou na fila de espera
     boolean placaJaExiste(String placa) {
         for (ICarro carro : carrosEstacionados) {
-            if (carro != null && carro.getPlaca().equals(placa)) {
+            if (carro != null && carro.getHorarioSaida() == 0 && carro.getPlaca().equals(placa)) {
                 return true;
             }
         }
-
         for (ICarro carro : filaEspera) {
             if (carro != null && carro.getPlaca().equals(placa)) {
                 return true;
@@ -73,14 +72,12 @@ public class Estacionamento implements IEstacionamento {
         }
 
         if (vagas.tamanho() < MAX_VAGAS) {
-            // Redimensiona o array se necessário, ANTES de adicionar o carro
             if (numCarrosEstacionados == carrosEstacionados.length) {
                 redimensionarCarrosEstacionados();
             }
-
             vagas.empilhar(carro);
             carro.setHorarioChegada(horarioChegada++);
-            carrosEstacionados[numCarrosEstacionados++] = carro; // Adiciona ao array após o redimensionamento
+            carrosEstacionados[numCarrosEstacionados++] = carro;
             System.out.println("Carro " + carro.getPlaca() + " estacionado.");
         } else {
             filaEspera.enfileirar(carro);
@@ -96,111 +93,112 @@ public class Estacionamento implements IEstacionamento {
             return;
         }
 
-
-        PilhaVet<ICarro> temp = new PilhaVet<>(MAX_VAGAS); // Pilha temporária com tamanho fixo
+        PilhaVet<ICarro> temp = new PilhaVet<>(MAX_VAGAS);
         ICarro carroRemovido = null;
 
-
         while (!vagas.estaVazia()) {
-
             ICarro carroAtual = vagas.desempilhar();
-
             if (carroAtual != null && carroAtual.getPlaca().equals(placa)) {
                 carroRemovido = carroAtual;
                 carroRemovido.setHorarioSaida(horarioSaida++);
                 break;
             }
-
-            if (carroAtual != null) {
-                temp.empilhar(carroAtual);
-            }
+            temp.empilhar(carroAtual);
         }
 
-
-        // Se o carro foi removido, move o próximo da fila para a vaga
         if (carroRemovido != null) {
             System.out.println("Carro " + carroRemovido.getPlaca() + " removido.");
 
-            if (!filaEspera.estaVazia()) {
-                ICarro proximoCarro = filaEspera.remover();
-
-                // Adiciona o carro da fila no lugar do carro removido (ANTES de restaurar a pilha temp)
-                estacionarCarro(proximoCarro);
-
+            if (!filaEspera.estaVazia() && vagas.tamanho() < MAX_VAGAS) {
+                estacionarCarro(filaEspera.remover());
+            } else if (!filaEspera.estaVazia()) {
+                System.out.println("Há carros na fila de espera, mas o estacionamento está cheio.");
             } else {
-
                 System.out.println("Vaga liberada, mas a fila de espera está vazia.");
-
             }
-
-
-            // Restaura a pilha 'vagas' com os carros da pilha temporária
-            while (!temp.estaVazia()) {
-
-                vagas.empilhar(temp.desempilhar());
-
-            }
-
-            // Remove o carro do array carrosEstacionados (após restaurar a pilha)
-
-            for (int i = 0; i < numCarrosEstacionados; i++) {
-
-                if (carrosEstacionados[i] == carroRemovido) {
-                    for (int j = i; j < numCarrosEstacionados - 1; j++) {
-
-                        carrosEstacionados[j] = carrosEstacionados[j + 1];
-                    }
-                    carrosEstacionados[numCarrosEstacionados - 1] = null;
-                    numCarrosEstacionados--;
-                    break;
-                }
-            }
-
         } else {
-            // Restaura a pilha se o carro não foi encontrado
-            while (!temp.estaVazia()) {
-                vagas.empilhar(temp.desempilhar());
-            }
             System.out.println("Carro com placa " + placa + " não encontrado.");
         }
+
+
+        // Restaura a pilha 'vagas'
+        while (!temp.estaVazia()) {
+            vagas.empilhar(temp.desempilhar());
+        }
+
     }
 
 
     // Método para gerar o relatório diário
     @Override
     public void relatorioDiario() {
-        if (numCarrosEstacionados == 0) {
-            System.out.println("Não há carros estacionados para gerar relatório.");
+        if (numCarrosEstacionados == 0 && filaEspera.estaVazia()) {
+            System.out.println("Não há carros para gerar relatório.");
             return;
         }
 
-        // Cria uma cópia do array carrosEstacionados SEM USAR Arrays.copyOf()
-        ICarro[] carrosParaOrdenar = new ICarro[numCarrosEstacionados];
-        for (int i = 0; i < numCarrosEstacionados; i++) {
-            carrosParaOrdenar[i] = carrosEstacionados[i];
+        // 1. Cria uma cópia do array carrosEstacionados para a ordenação, apenas com os carros que estão atualmente no estacionamento
+        int carrosEstacionadosAtualmente = 0;
+        for (ICarro carro : carrosEstacionados) {
+            if (carro != null && carro.getHorarioSaida() == 0) {
+                carrosEstacionadosAtualmente++;
+            }
+        }
+        ICarro[] carrosParaOrdenar = new ICarro[carrosEstacionadosAtualmente];
+        int indiceNaoNulos = 0;
+        for (int i = 0; i < carrosEstacionados.length; i++) {
+            if (carrosEstacionados[i] != null && carrosEstacionados[i].getHorarioSaida() == 0) {
+
+                carrosParaOrdenar[indiceNaoNulos++] = carrosEstacionados[i];
+            }
+
         }
 
-        // Ordena a cópia usando MergeSort (implementação manual)
-        MergeSort<ICarro> mergeSort = new MergeSort<>();
-        mergeSort.ordenar(carrosParaOrdenar);
+        // 2. Ordena a cópia usando MergeSort (se não for vazia)
+        if (carrosParaOrdenar.length > 0) {
+            MergeSort<ICarro> mergeSort = new MergeSort<>();
+
+            mergeSort.ordenar(carrosParaOrdenar);
+        }
+
+        // 3. Imprime o relatório dos carros estacionados
+        System.out.println("Relatório Diário - Carros Estacionados:");
+        for (ICarro carro : carrosParaOrdenar) {
+
+            System.out.println("Placa: " + carro.getPlaca() +
+                    ", Chegada: " + carro.getHorarioChegada() +
+                    ", Saída: " + (carro.getHorarioSaida() == 0 ? "Ainda estacionado" : carro.getHorarioSaida()));
 
 
-        System.out.println("Relatório Diário:");
+
+        }
 
 
-        for (int i = 0; i < numCarrosEstacionados; i++) {
 
-            if (carrosParaOrdenar[i] != null) {
-                System.out.println("Placa: " + carrosParaOrdenar[i].getPlaca() +
-                        ", Chegada: " + carrosParaOrdenar[i].getHorarioChegada() +
-                        ", Saída: " + (carrosParaOrdenar[i].getHorarioSaida() == 0 ? "Ainda estacionado" : carrosParaOrdenar[i].getHorarioSaida()));
+        // 4. Imprime o histórico dos carros que já saíram
+        System.out.println("\nHistórico de Carros que Saíram:");
+        for (ICarro carro : carrosEstacionados) {
+            if (carro != null && carro.getHorarioSaida() != 0) {
+                System.out.println("Placa: " + carro.getPlaca() +
+                        ", Chegada: " + carro.getHorarioChegada() +
+                        ", Saída: " + carro.getHorarioSaida());
+            }
+
+        }
+
+
+
+        // 5. Imprime os carros na fila de espera
+        if (!filaEspera.estaVazia()) {
+            System.out.println("\nCarros na fila de espera:");
+            for (ICarro carro : filaEspera) {
+                System.out.println("Placa: " + carro.getPlaca());
 
             }
 
+        }  else if (carrosEstacionadosAtualmente == 0) {
+            System.out.println("Sem carros estacionados, mas há carros na fila de espera.");
 
         }
-
-
     }
-
 }

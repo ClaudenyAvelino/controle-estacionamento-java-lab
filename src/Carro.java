@@ -43,5 +43,4 @@ class Carro implements ICarro, Comparable<ICarro> {
     public int compareTo(ICarro outroCarro) {
         return Integer.compare(this.getHorarioChegada(), outroCarro.getHorarioChegada());
     }
-
 }
