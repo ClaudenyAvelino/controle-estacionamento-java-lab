@@ -168,12 +168,7 @@ public class Estacionamento implements IEstacionamento {
             System.out.println("Placa: " + carro.getPlaca() +
                     ", Chegada: " + carro.getHorarioChegada() +
                     ", Saída: " + (carro.getHorarioSaida() == 0 ? "Ainda estacionado" : carro.getHorarioSaida()));
-
-
-
         }
-
-
 
         // 4. Imprime o histórico dos carros que já saíram
         System.out.println("\nHistórico de Carros que Saíram:");
@@ -186,19 +181,15 @@ public class Estacionamento implements IEstacionamento {
 
         }
 
-
-
         // 5. Imprime os carros na fila de espera
         if (!filaEspera.estaVazia()) {
             System.out.println("\nCarros na fila de espera:");
             for (ICarro carro : filaEspera) {
                 System.out.println("Placa: " + carro.getPlaca());
-
             }
 
-        }  else if (carrosEstacionadosAtualmente == 0) {
+        } else if (carrosEstacionadosAtualmente == 0) {
             System.out.println("Sem carros estacionados, mas há carros na fila de espera.");
-
         }
     }
 }
