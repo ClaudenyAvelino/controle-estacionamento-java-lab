@@ -29,7 +29,7 @@ public class Estacionamento implements IEstacionamento {
     public void mensagemBoasVnindas() {
         String mensagemInicial = """
                 ************************************
-                **********Seja bem vindo!**********
+                ********* Seja bem vindo! **********
                 ************************************
                 """;
         System.out.print(mensagemInicial);
@@ -45,6 +45,10 @@ public class Estacionamento implements IEstacionamento {
                 Escolha uma opção:
                 """;
         System.out.print(menuOpcoes);
+    }
+
+    public boolean estacionamentoVazio() {
+        return vagas.estaVazia(); // Retorna true se o estacionamento (pilha vagas) estiver vazio
     }
 
 
