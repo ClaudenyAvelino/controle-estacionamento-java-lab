@@ -15,10 +15,10 @@ public class PilhaVet<T> implements IPilha<T> {
 
     @Override
     public T top() {
-        if (estaVazia()) {  // Verificação se a pilha está vazia
+        if (estaVazia()) {  // Verifica se a pilha está vazia
             return null;
         }
-        return V[topo - 1];  // Retorna o topo da pilha
+        return V[topo - 1];  // Retorna o elemento no topo da pilha
     }
 
     @Override
@@ -26,7 +26,7 @@ public class PilhaVet<T> implements IPilha<T> {
         for (int i = 0; i < topo; i++) {
             V[i] = null; // Limpa os elementos da pilha
         }
-        topo = 0; // Reseta o topo
+        topo = 0; // Reseta o topo da pilha
     }
 
     @Override
@@ -38,38 +38,37 @@ public class PilhaVet<T> implements IPilha<T> {
         int novoTamanho = V.length + vlIncremento;
         T[] novoArray = (T[]) new Object[novoTamanho];
 
-        // Cópia manual dos elementos (sem System.arraycopy)
+        // Cópia manual dos elementos da pilha para o novo array
         for (int i = 0; i < topo; i++) {
             novoArray[i] = V[i];
         }
 
-
-        V = novoArray;
+        V = novoArray;  // Atualiza a referência da pilha com o novo array redimensionado
     }
 
     @Override
     public boolean estaVazia() {
-        return topo == 0;  // A pilha está vazia se o topo for 0
+        return topo == 0;  // Retorna verdadeiro se a pilha estiver vazia (topo == 0)
     }
 
     @Override
     public boolean contem(T elemento) {
         for (int i = 0; i < topo; i++) {
             if (V[i].equals(elemento)) {
-                return true;  // Retorna true se o elemento for encontrado
+                return true;  // Retorna verdadeiro se o elemento for encontrado
             }
         }
-        return false;  // Caso contrário, retorna false
+        return false;  // Retorna falso caso o elemento não seja encontrado
     }
 
     @Override
     public int distancia(T elemento) {
         for (int i = 0; i < topo; i++) {
             if (V[i].equals(elemento)) {
-                return topo - i - 1;  // Retorna a distância do topo
+                return topo - i - 1;  // Retorna a distância do topo até o elemento encontrado
             }
         }
-        return -1;  // Se o elemento não for encontrado, retorna -1
+        return -1;  // Retorna -1 se o elemento não for encontrado
     }
 
     @Override
@@ -77,19 +76,19 @@ public class PilhaVet<T> implements IPilha<T> {
         if (estaVazia()) {  // Verifica se a pilha está vazia
             return null;
         }
-        T elemento = this.top();  // Pega o topo da pilha
+        T elemento = this.top();  // Obtém o topo da pilha
         V[topo - 1] = null;  // Limpa o elemento removido
-        topo--;  // Decrementa o topo
+        topo--;  // Decrementa o topo da pilha
         return elemento;  // Retorna o elemento desempilhado
     }
 
     @Override
     public void empilhar(T elemento) {
-        if (topo == V.length) {  // Verifica se a pilha está cheia
+        if (topo == V.length) {  // Verifica se a pilha atingiu o seu tamanho máximo
             this.redimensionar();  // Redimensiona a pilha se necessário
         }
-        V[topo] = elemento;  // Empilha o novo elemento
-        topo++;  // Incrementa o topo
+        V[topo] = elemento;  // Empilha o novo elemento no topo
+        topo++;  // Incrementa o topo após empilhar o elemento
     }
 
     @Override
@@ -98,11 +97,11 @@ public class PilhaVet<T> implements IPilha<T> {
         for (int i = 0; i < topo; i++) {
             sb.append(V[i]);
             if (i < topo - 1) {
-                sb.append(", ");
+                sb.append(", ");  // Adiciona vírgula entre os elementos, exceto no último
             }
         }
         sb.append("]");
-        return sb.toString();  // Converte a pilha em uma string legível
+        return sb.toString();  // Retorna a representação da pilha em formato de string
     }
 
     @Override
@@ -112,12 +111,12 @@ public class PilhaVet<T> implements IPilha<T> {
 
             @Override
             public boolean hasNext() {
-                return currentIndex < topo;
+                return currentIndex < topo;  // Retorna verdadeiro se houver mais elementos
             }
 
             @Override
             public T next() {
-                return V[currentIndex++];
+                return V[currentIndex++];  // Retorna o próximo elemento e incrementa o índice
             }
         };
     }
